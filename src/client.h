@@ -5,10 +5,8 @@
 #include <WS2tcpip.h>
 #include <string>
 #include <vector>
-#include <cstddef>
-#include <memory>
 #include <functional>
-#include <iostream>
+#include <thread>
 #include "notifier.h"
 
 namespace basic_net {
@@ -137,6 +135,12 @@ class Socket {
 };
 
 
+//THINK not a gread definition of buffer, but for now it does the work
+template <typename T>
+concept Buffer = requires (T buffer) {
+	(char*)buffer.data();
+	(int)buffer.capacity();
+};
 
 class ActiveSocket final : public Socket {
 	
@@ -174,17 +178,21 @@ class ActiveSocket final : public Socket {
 	 * @param buffer 
 	 * @return 
 	*/
-	int receive(std::vector<char>& buffer) {
+	template <Buffer Buff = std::vector<char>>
+	int receive (Buff& buffer) {
 		n::notify("receiving...");
 		const int received = ::recv(socket, buffer.data(), buffer.capacity(), 0);
 		if (received == SOCKET_ERROR) {throw SocketError{SOCKET_ERROR};}
+		n::notify(std::to_string(received) + " bits received");
 		return received;
 	}
 
-	int send(std::vector<char>& buffer) {
+	template <Buffer Buff = std::vector<char>>
+	int send(Buff& buffer) {
 		n::notify("sending...");
 		const int sent = ::send(socket, buffer.data(), buffer.capacity(), 0);
 		if (sent == SOCKET_ERROR) {throw SocketError{SOCKET_ERROR};}
+		n::notify(std::to_string(sent) + " bits sent");
 		return sent;
 	}
 
@@ -196,7 +204,7 @@ class ListeningSocket final : public Socket {
 
 	public:
 	ListeningSocket(const std::string& port,int family = AF_UNSPEC, int socktype = SOCK_STREAM, int protocol = IPPROTO_TCP)
-		: Socket{port, "127.0.0.1", family, socktype, protocol, AI_PASSIVE} {
+		: Socket{port, "192.168.1.98", family, socktype, protocol, AI_PASSIVE} {
 		bind();
 	}
 	
@@ -249,9 +257,8 @@ class Listener {
 	void listen(std::function<void(ActiveSocket)> manageAcceptedConnection) {
 		socket->listen();
 		while (true) {
-			std::cout << "\ncicled\n"; //DEBUG
 			std::thread t{manageAcceptedConnection, socket->accept()};
-			std::cout << "thread created\n"; //DEBUG
+			n::notify("thread for new socket created");
 			t.detach();
 		}
 	}

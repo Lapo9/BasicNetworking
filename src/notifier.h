@@ -1,4 +1,5 @@
-#pragma once
+#ifndef BASICNETWORKING_NOTIFIER
+#define BASICNETWORKING_NOTIFIER
 
 #include <iostream>
 #include <string>
@@ -20,3 +21,5 @@ struct Notifier {
 };
 
 }
+
+#endif

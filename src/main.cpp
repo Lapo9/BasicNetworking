@@ -1,11 +1,9 @@
 #include <winsock2.h>
-#include <ws2tcpip.h>
 #include <iostream>
-#include <thread>
 #include <vector>
 #include "client.h"
 
-void mainClient();
+void mainClient(char*, char*);
 void mainServer();
 
 int main(int argc, char* argv[]) {
@@ -15,18 +13,21 @@ int main(int argc, char* argv[]) {
 	}
 	else if (strcmp(argv[1], "-c") == 0) {
 		std::cout << "\nCLIENT\n";
-		mainClient();
+		mainClient(argv[2], argv[3]);
 	}
 	return 0;
 }
 
 
-void mainClient() {
+void mainClient(char* IP, char* msg) {
 	WSADATA wsaData{0};
 	const int res = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-	basic_net::ActiveSocket sock{"14009", "127.0.0.1"};
-	std::vector<char> sendBuff {'0', 'H', 'e', 'l', 'l', 'o', '\0'};
+	basic_net::ActiveSocket sock{"14009", IP};
+	std::vector<char> sendBuff;
+	for (int i = 0; msg[i] != '\0'; ++i) {
+		sendBuff.emplace_back(msg[i]);
+	}
 	std::vector<char> recvBuff (2048);
 	sock.send(sendBuff);
 	Sleep(3000);
@@ -39,6 +40,7 @@ void answer(basic_net::ActiveSocket as) {
 	std::vector<char> recvBuff(2048);
 
 	as.receive(recvBuff);
+	std::cout << "\nReceived message: " << recvBuff.data() << '\n';
 	std::vector<char> sendBuff;
 	sendBuff.emplace_back(recvBuff[0]);
 	sendBuff.emplace_back('H');
