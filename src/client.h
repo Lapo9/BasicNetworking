@@ -80,10 +80,7 @@ class Socket {
 	::SOCKET socket = INVALID_SOCKET;
 	const Addrinfo addrinfo;
 
-	~Socket() noexcept {
-		n::notify("destroying socket...");
-		//TODO maybe check if ::closesocket(socket) has been called?
-	}
+	
 
 
 	public:
@@ -116,15 +113,25 @@ class Socket {
 		socket = plainSocket;
 	}
 
-	Socket(const Socket&) = default;
-	Socket(Socket&&) = default;
-	Socket& operator= (const Socket&) = default;
+	~Socket() noexcept {
+		n::notify("destroying socket...");
+		::closesocket(socket);
+		//TODO maybe check if ::closesocket(socket) has been called?
+	}
+
+	Socket(const Socket&) = delete;
+	Socket(Socket &&rhs)
+		:socket(INVALID_SOCKET)
+	{
+		std::swap(socket, rhs.socket);
+	}
+	Socket& operator= (const Socket&) = delete;
 	Socket& operator= (Socket&&) = default;
 
 
 	//TODO is shutdown needed?
 	/**
-	 * @brief Closes the connection and call the destructor.
+	 * @brief Closes the connection and calls the destructor.
 	*/
 	void close() {
 		n::notify("closing socket...");
@@ -135,7 +142,7 @@ class Socket {
 };
 
 
-//THINK not a gread definition of buffer, but for now it does the work
+//THINK not a great definition of buffer, but for now it does the work
 template <typename T>
 concept Buffer = requires (T buffer) {
 	(char*)buffer.data();
@@ -199,10 +206,10 @@ class ActiveSocket final : public Socket {
 };
 
 
-
 class ListeningSocket final : public Socket {
 
 	public:
+	//TODO listening socket should choose automatically its IP (the IP of the machine)
 	ListeningSocket(const std::string& port,int family = AF_UNSPEC, int socktype = SOCK_STREAM, int protocol = IPPROTO_TCP)
 		: Socket{port, "192.168.1.98", family, socktype, protocol, AI_PASSIVE} {
 		bind();
@@ -249,18 +256,26 @@ class Listener {
 		
 	}
 
+	void Start()
+	{
+		socket->listen();
+	}
+
+
 	/**
 	 * @brief Starts listening for new connection on the member ListeningSocket. 
 	 * @details When a new connection is detected it is accepted, a new ActiveSocket to deal with such connection is created and passed to a new thread.
 	 * @param manageAcceptedConnection The function that has to deal with the new connection. The new ActiveSocket created when the connection is accepted is passed ad argument. This function execute on a new thread.
 	*/
-	void listen(std::function<void(ActiveSocket)> manageAcceptedConnection) {
-		socket->listen();
-		while (true) {
+	ActiveSocket AcceptOne() {
+		
+		return socket->accept();
+
+		/*while (true) {
 			std::thread t{manageAcceptedConnection, socket->accept()};
 			n::notify("thread for new socket created");
 			t.detach();
-		}
+		}*/
 	}
 
 

@@ -1,0 +1,41 @@
+﻿
+
+
+
+// Document.h
+
+#define DOCUMENT_HANDLE size_t
+
+DOCUMENT_HANDLE CreateDocument(const char *name);
+
+void CloseDocument(DOCUMENT_HANDLE d);
+
+void WriteToDocument(DOCUMENT_HANDLE d, const char *text);
+
+
+
+// Document.cxx
+// Implemented by OS
+// Compiled to Document.lib
+
+
+std::vector<File> Documents;
+
+DOCUMENT_HANDLE CreateDocument(const char *name)
+{
+     File f = OpenFile(name);
+     Documents.push_back(f);
+     return (DOCUMENT_HANDLE)Documents.size()-1; // a "handle" to the document
+}
+
+void CloseDocument(DOCUMENT_HANDLE h)
+{
+   File f = Documents[h];
+   f.close();
+   Documents.erase(Documents.begin() + h);
+}
+
+void WriteToDocument(DOCUMENT_HANDLE d, const char *text)
+{
+    Documents[d].Write(text);
+}

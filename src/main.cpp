@@ -59,6 +59,13 @@ void mainServer() {
 	basic_net::ListeningSocket sock{"14009"};
 	basic_net::Listener listen{sock};
 	/*std::thread close{ [&sock](){Sleep(3000); 
-								 sock.close();}};*/
-	listen.listen(answer);
+							 sock.close();}};*/
+
+	listen.Start();
+
+	while(true) // for now
+	{
+		auto socket = listen.AcceptOne();
+		answer(socket);
+	}
 }
