@@ -116,9 +116,9 @@ class Socket {
 		socket = plainSocket;
 	}
 
-	Socket(const Socket&) = default;
+	Socket(const Socket&) = delete;
 	Socket(Socket&&) = default;
-	Socket& operator= (const Socket&) = default;
+	Socket& operator= (const Socket&) = delete;
 	Socket& operator= (Socket&&) = default;
 
 
@@ -155,9 +155,9 @@ class ActiveSocket final : public Socket {
 		//connect();
 	}
 	
-	ActiveSocket(const ActiveSocket&) = default;
+	ActiveSocket(const ActiveSocket&) = delete;
 	ActiveSocket(ActiveSocket&&) = default;
-	ActiveSocket& operator= (const ActiveSocket&) = default;
+	ActiveSocket& operator= (const ActiveSocket&) = delete;
 	ActiveSocket& operator= (ActiveSocket&&) = default;
 
 	~ActiveSocket() = default;
@@ -208,9 +208,9 @@ class ListeningSocket final : public Socket {
 		bind();
 	}
 	
-	ListeningSocket(const ListeningSocket&) = default;
+	ListeningSocket(const ListeningSocket&) = delete;
 	ListeningSocket(ListeningSocket&&) = default;
-	ListeningSocket& operator= (const ListeningSocket&) = default;
+	ListeningSocket& operator= (const ListeningSocket&) = delete;
 	ListeningSocket& operator= (ListeningSocket&&) = default;
 
 	~ListeningSocket() = default;

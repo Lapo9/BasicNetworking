@@ -3,7 +3,7 @@
 #include <vector>
 #include "client.h"
 
-void mainClient(char*, char*);
+void mainClient(char*, char*, char*);
 void mainServer();
 
 int main(int argc, char* argv[]) {
@@ -13,17 +13,17 @@ int main(int argc, char* argv[]) {
 	}
 	else if (strcmp(argv[1], "-c") == 0) {
 		std::cout << "\nCLIENT\n";
-		mainClient(argv[2], argv[3]);
+		mainClient(argv[2], argv[3], argv[4]);
 	}
 	return 0;
 }
 
 
-void mainClient(char* IP, char* msg) {
+void mainClient(char* IP, char* port, char* msg) {
 	WSADATA wsaData{0};
 	const int res = WSAStartup(MAKEWORD(2, 2), &wsaData);
 
-	basic_net::ActiveSocket sock{"14009", IP};
+	basic_net::ActiveSocket sock{port, IP};
 	std::vector<char> sendBuff;
 	for (int i = 0; msg[i] != '\0'; ++i) {
 		sendBuff.emplace_back(msg[i]);
